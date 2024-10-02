@@ -27,14 +27,13 @@ export class UserController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role([Roles.ADMIN])
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Patch('password')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Role([Roles.ADMIN, Roles.VIEWER])
   changeOwnPassword(
     @Body() changePasswordDto: ChangePasswordDto,
     @ReqUser() user: User,
@@ -52,10 +51,13 @@ export class UserController {
     return this.userService.changePassword(changePasswordDto, id);
   }
 
-  @Delete(':id')
+  @Delete()
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role([Roles.ADMIN])
-  deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.deleteUser(id);
+  @Role([Roles.ADMIN, Roles.VIEWER])
+  deleteUser(
+    // @Param('id', ParseIntPipe) id: number
+    @ReqUser() user: User,
+  ) {
+    return this.userService.deleteUser(user.id);
   }
 }

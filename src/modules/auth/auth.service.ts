@@ -21,10 +21,7 @@ export class AuthService {
   async login(res: Response, authDto: AuthDto) {
     await this.validateUser(authDto);
 
-    const user = await this.userService.getBy({
-      key: 'email',
-      value: authDto.email,
-    });
+    const user = await this.userService.getByEmail(authDto.email);
     if (!user) throw new BadRequestException(ERRORS.AUTH.WRONG_CREDENTIALS);
 
     const tokens = this.createTokens(user);
@@ -34,15 +31,15 @@ export class AuthService {
   }
 
   async logout(req: Request, res: Response) {
-    req.logout((err) => {
-      return err;
-    });
+    // req.logout({ keepSessionInfo: false }, (err) => {
+    //   return err;
+    // });
     res.clearCookie(TOKEN_TYPES.REFRESH_TOKEN);
     return { message: MESSAGES.AUTH.LOGOUT_SUCCESS };
   }
 
   async validateUser({ email, password }: AuthDto): Promise<User> {
-    const user = await this.userService.getBy({ key: 'email', value: email });
+    const user = await this.userService.getByEmail(email);
     if (!user) throw new BadRequestException(ERRORS.AUTH.WRONG_CREDENTIALS);
 
     this.checkUserStatus(user);

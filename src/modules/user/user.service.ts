@@ -7,7 +7,6 @@ import {
 import { User } from '@prisma/client';
 
 import { PrismaService } from '../../shared/services/prisma.service';
-import { IGetBy } from '../../shared/interfaces/get-by';
 import { CreateUserDto } from './dto/create-user.dto';
 import { randomString } from '../../shared/utils/generate-password';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -18,19 +17,24 @@ import { MESSAGES } from '../../shared/constants/messages';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  getBy({ key, value }: IGetBy): Promise<User> {
+  getById(id: number): Promise<User> {
     return this.prisma.user.findUnique({
       where: {
-        [key]: value,
+        id: id,
+      },
+    });
+  }
+
+  getByEmail(email: string): Promise<User> {
+    return this.prisma.user.findUnique({
+      where: {
+        email: email,
       },
     });
   }
 
   async create(createUserDto: CreateUserDto) {
-    const existedUser = await this.getBy({
-      key: 'email',
-      value: createUserDto.email,
-    });
+    const existedUser = await this.getByEmail(createUserDto.email);
     if (existedUser) throw new BadRequestException(ERRORS.USER.ALREADY_EXIST);
 
     let password = createUserDto.password;
@@ -48,7 +52,7 @@ export class UserService {
   }
 
   async changePassword(changePasswordDto: ChangePasswordDto, id: number) {
-    const existUser = await this.getBy({ key: 'id', value: id });
+    const existUser = await this.getById(id);
     if (!existUser) throw new BadRequestException(ERRORS.USER.NOT_EXIST);
 
     await this.verifyPassword(
@@ -88,10 +92,7 @@ export class UserService {
   }
 
   async deleteUser(id: number) {
-    const existedUser = await this.getBy({
-      key: 'id',
-      value: id,
-    });
+    const existedUser = await this.getById(id);
 
     if (!existedUser) {
       throw new NotFoundException(ERRORS.USER.NOT_EXIST);

@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate({ id, type }) {
-    const user = await this.userService.getBy({ key: 'id', value: id });
+    const user = await this.userService.getById(id);
     if (!user) throw new BadRequestException(ERRORS.USER.NOT_EXIST);
 
     return { user, type };
