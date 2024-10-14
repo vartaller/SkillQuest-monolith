@@ -98,6 +98,8 @@ export class UserService {
       throw new NotFoundException(ERRORS.USER.NOT_EXIST);
     }
 
+    console.log(existedUser);
+
     await this.prisma.user.delete({
       where: {
         id: id,

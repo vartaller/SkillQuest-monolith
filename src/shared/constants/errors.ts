@@ -1,9 +1,9 @@
 export const ERRORS = {
-  FILE: {
-    INVALID_FORMAT: 'Invalid file format',
-    EMPTY_FILE: 'Fle is empty',
-    UPLOAD_ERROR: 'Upload error',
-  },
+  // FILE: {
+  //   INVALID_FORMAT: 'Invalid file format',
+  //   EMPTY_FILE: 'Fle is empty',
+  //   UPLOAD_ERROR: 'Upload error',
+  // },
   USER: {
     PASSWORD:
       'The password must contain from 8 to 64 characters, must include 2 letters (at least 1 uppercase and one lowercase), numbers and special characters!',
@@ -21,7 +21,10 @@ export const ERRORS = {
     NOT_EXIST: 'No such field in this table',
     EMPTY: 'Your dataset to save is empty',
   },
-  FILTER: {
-    WRONG_COLUMN: 'Incorrect column value',
+  CHARACTER: {
+    NOT_EXIST: 'Character does not exist',
   },
+  // FILTER: {
+  //   WRONG_COLUMN: 'Incorrect column value',
+  // },
 };
