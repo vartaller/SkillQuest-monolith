@@ -9,8 +9,9 @@ import {
   Post,
   UseGuards,
   Delete,
+  Get,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Character, User } from '@prisma/client';
 
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
@@ -24,6 +25,24 @@ import { ReqUser } from '../../shared/decorators/req-user';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @HttpCode(HttpStatus.OK)
+  get(@Param('id', ParseIntPipe) userId: number): Promise<User> {
+    const user = this.userService.getUserById(userId);
+    return user;
+  }
+
+  @Get('character/:id')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @HttpCode(HttpStatus.OK)
+  getCharacter(
+    @Param('id', ParseIntPipe) userId: number,
+  ): Promise<Character[]> {
+    const user = this.userService.getCharacterByUserId(userId);
+    return user;
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

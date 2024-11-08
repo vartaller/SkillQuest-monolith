@@ -14,7 +14,7 @@ export class SkillService {
 
   async create(skillDto: SkillDto, userId: number) {
     const existedCharacter: Character =
-      await this.characterService.getByUserId(userId);
+      await this.characterService.getById(userId);
 
     if (existedCharacter)
       throw new BadRequestException(ERRORS.CHARACTER.NOT_EXIST);

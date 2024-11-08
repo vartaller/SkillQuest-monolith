@@ -4,7 +4,7 @@ import {
   NotFoundException,
   Injectable,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Character, User } from '@prisma/client';
 
 import { PrismaService } from '../../shared/services/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,12 +17,38 @@ import { MESSAGES } from '../../shared/constants/messages';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  getById(id: number): Promise<User> {
+  getUserById(id: number): Promise<User> {
     return this.prisma.user.findUnique({
       where: {
         id: id,
       },
+      include: {
+        character: true,
+      },
     });
+  }
+
+  async getCharacterByUserId(id: number): Promise<Character[]> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        character: {
+          include: {
+            passiveEffects: true,
+            activeEffects: true,
+            skills: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new Error(ERRORS.USER.NOT_EXIST);
+    }
+
+    return user.character;
   }
 
   getByEmail(email: string): Promise<User> {
@@ -52,7 +78,7 @@ export class UserService {
   }
 
   async changePassword(changePasswordDto: ChangePasswordDto, id: number) {
-    const existUser = await this.getById(id);
+    const existUser = await this.getUserById(id);
     if (!existUser) throw new BadRequestException(ERRORS.USER.NOT_EXIST);
 
     await this.verifyPassword(
@@ -92,7 +118,7 @@ export class UserService {
   }
 
   async deleteUser(id: number) {
-    const existedUser = await this.getById(id);
+    const existedUser = await this.getUserById(id);
 
     if (!existedUser) {
       throw new NotFoundException(ERRORS.USER.NOT_EXIST);

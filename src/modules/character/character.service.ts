@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../shared/services/prisma.service';
 import { Character } from '@prisma/client';
 import { CharacterDto } from './dto/сharacterName.dto';
+import { ERRORS } from '../../shared/constants/errors';
 
 @Injectable()
 export class CharacterService {
@@ -17,16 +18,20 @@ export class CharacterService {
     }
   }
 
-  async getByUserId(userId: number): Promise<Character> {
+  async getById(characterId: number): Promise<Character> {
     try {
-      // @ts-ignore
-      return this.prisma.user.findUnique({
+      return this.prisma.character.findUnique({
         where: {
-          id: userId,
+          id: characterId,
+        },
+        include: {
+          passiveEffects: true,
+          activeEffects: true,
+          skills: true,
         },
       });
     } catch (err) {
-      throw new Error(err);
+      throw new Error(`${ERRORS.CHARACTER.NOT_EXIST} ${err.message}`);
     }
   }
 }

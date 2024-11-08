@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { CharacterService } from './character.service';
 import { Character, User } from '@prisma/client';
 import { CharacterDto } from './dto/сharacterName.dto';
@@ -18,9 +26,10 @@ export class CharacterController {
     return this.characterService.create(characterDto, user.id);
   }
 
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  getCharacterByUserId(@ReqUser() user: User): Promise<Character> {
-    return this.characterService.getByUserId(user.id);
+  @Get(':id')
+  getCharacterById(
+    @Param('id', ParseIntPipe) characterId: number,
+  ): Promise<Character> {
+    return this.characterService.getById(characterId);
   }
 }
