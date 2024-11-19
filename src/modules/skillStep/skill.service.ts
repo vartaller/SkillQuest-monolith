@@ -37,21 +37,12 @@ export class SkillService {
     }
   }
 
-  async getSkill(skillId: number) {
-    try {
-      return this.prisma.skill.findUnique({
-        where: { id: skillId },
-      });
-    } catch (err) {
-      throw new Error(`${ERRORS.SKILL.NOT_EXIST} ${err.message}`);
-    }
-  }
-
-  async updateSkill(skillId: number, updateNameDto: UpdateSkillNameDto) {
-    await this.checkCharacterPermission(
-      updateNameDto.userId,
-      updateNameDto.characterId,
-    );
+  async updateSkill(
+    skillId: number,
+    updateNameDto: UpdateSkillNameDto,
+    userId: number,
+  ) {
+    await this.checkCharacterPermission(userId, updateNameDto.characterId);
 
     const existedSkill: Skill = await this.getSkill(skillId);
 
@@ -73,10 +64,10 @@ export class SkillService {
   async updateSkillLevel(
     skillId: number,
     updateSkillLevelDto: UpdateSkillLevelDto,
-    exp: number,
+    userId: number,
   ) {
-    const existedCharacter: Character = await this.checkCharacterPermission(
-      updateSkillLevelDto.userId,
+    await this.checkCharacterPermission(
+      userId,
       updateSkillLevelDto.characterId,
     );
 
@@ -88,9 +79,10 @@ export class SkillService {
     )
       throw new BadRequestException(ERRORS.SKILL.NOT_EXIST);
 
-    let currentPoints = existedSkill.currentPoints;
-    let level = existedSkill.level;
-    let pointsToNextLevel = existedSkill.pointsToNextLevel;
+    const exp = Number(updateSkillLevelDto.exp);
+    let currentPoints = Number(existedSkill.currentPoints);
+    let level = Number(existedSkill.level);
+    let pointsToNextLevel = Number(existedSkill.pointsToNextLevel);
 
     if (exp + currentPoints >= pointsToNextLevel) {
       level++;
@@ -114,10 +106,27 @@ export class SkillService {
     }
   }
 
-  async remove(skillId: number) {
+  async remove(skillId: number, userId: number) {
+    const existedSkill: Skill = await this.getSkill(skillId);
+
+    await this.checkCharacterPermission(userId, existedSkill.characterId);
+
+    if (!existedSkill || existedSkill.characterId != existedSkill.characterId)
+      throw new BadRequestException(ERRORS.SKILL.NOT_EXIST);
+
     return this.prisma.skill.delete({
       where: { id: skillId },
     });
+  }
+
+  async getSkill(skillId: number) {
+    try {
+      return this.prisma.skill.findUnique({
+        where: { id: skillId },
+      });
+    } catch (err) {
+      throw new Error(`${ERRORS.SKILL.NOT_EXIST} ${err.message}`);
+    }
   }
 
   private async checkCharacterPermission(
@@ -128,7 +137,10 @@ export class SkillService {
       await this.characterService.getById(characterId);
 
     if (!existedCharacter || existedCharacter.userId != userId)
-      throw new BadRequestException(ERRORS.CHARACTER.NOT_EXIST);
+      throw new BadRequestException(
+        ERRORS.CHARACTER.NOT_EXIST,
+        `existedCharacter = ${existedCharacter}`,
+      );
 
     return existedCharacter;
   }
