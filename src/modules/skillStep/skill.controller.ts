@@ -10,33 +10,43 @@ import {
 } from '@nestjs/common';
 import { SkillService } from './skill.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { ReqUser } from '../../shared/decorators/req-user';
-import { Skill, User } from '@prisma/client';
-import { SkillDto } from './dto/skill.dto';
+import { Skill } from '@prisma/client';
+import { CreateSkillDto } from './dto/createSkill.dto';
+import { UpdateSkillNameDto } from './dto/updateSkillName.dto';
+import { UpdateSkillLevelDto } from './dto/updateSkillLevel.dto';
 
 @Controller('skill')
 export class SkillController {
   constructor(private readonly skillService: SkillService) {}
 
-  @Post('skill')
+  @Post(':userId')
   @UseGuards(JwtAuthGuard)
   async createSkill(
-    @Body() skillDto: SkillDto,
-    @ReqUser() user: User,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() skillDto: CreateSkillDto,
   ): Promise<Skill> {
-    return this.skillService.create(skillDto, user.id);
+    return this.skillService.create(skillDto, userId);
   }
 
-  @Put('skill/:id')
+  @Put('name/:id')
   @UseGuards(JwtAuthGuard)
-  async changeSkill(
+  async updateSkill(
     @Param('id', ParseIntPipe) skillId: number,
-    @Body() updateSkillDto: SkillDto,
+    @Body() updateSkillDto: UpdateSkillNameDto,
   ): Promise<Skill> {
-    return this.skillService.change(skillId, updateSkillDto);
+    return this.skillService.updateSkill(skillId, updateSkillDto);
   }
 
-  @Delete('skill/:id')
+  @Put('level/:id')
+  @UseGuards(JwtAuthGuard)
+  async updateSkillLevel(
+    @Param('id', ParseIntPipe) skillId: number,
+    @Body() updateSkillDto: UpdateSkillLevelDto,
+  ): Promise<Skill> {
+    return this.skillService.updateSkillLevel(skillId, updateSkillDto);
+  }
+
+  @Delete(':id')
   @UseGuards(JwtAuthGuard)
   async removeSkill(
     @Param('id', ParseIntPipe) skillId: number,

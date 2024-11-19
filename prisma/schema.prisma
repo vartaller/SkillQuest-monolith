@@ -36,6 +36,7 @@ model Character {
   name              String
   level             Int      @default(0)
   currentExperience Int      @default(0)
+  pointsToNextLevel Int      @default(0)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -51,21 +52,27 @@ model Character {
 model PassiveEffect {
   id       Int     @id @default(autoincrement())
   name     String
-  value    Float
+  value    Int
   isActive Boolean
 
   character   Character @relation(fields: [characterId], references: [id])
   characterId Int
+
+  skill   Skill @relation(fields: [skillId], references: [id])
+  skillId Int
 }
 
 model ActiveEffect {
   id       Int     @id @default(autoincrement())
   name     String
-  value    Float
+  value    Int
   isActive Boolean
 
   character   Character @relation(fields: [characterId], references: [id])
   characterId Int
+
+  skill   Skill @relation(fields: [skillId], references: [id])
+  skillId Int
 }
 
 model Skill {
@@ -73,11 +80,13 @@ model Skill {
   name              String
   level             Int    @default(0)
   currentPoints     Int    @default(0)
-  pointsToNextLevel Int    @default(0)
+  pointsToNextLevel Int    @default(100)
 
-  character   Character     @relation(fields: [characterId], references: [id])
-  characterId Int
-  action      SkillAction[]
+  character     Character       @relation(fields: [characterId], references: [id])
+  characterId   Int
+  action        SkillAction[]
+  passiveEffect PassiveEffect[]
+  activeEffect  ActiveEffect[]
 }
 
 model SkillAction {

@@ -24,6 +24,9 @@ export const ERRORS = {
   CHARACTER: {
     NOT_EXIST: 'Character does not exist',
   },
+  SKILL: {
+    NOT_EXIST: 'Skill does not exist',
+  },
   // FILTER: {
   //   WRONG_COLUMN: 'Incorrect column value',
   // },
